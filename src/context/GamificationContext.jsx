@@ -1,5 +1,7 @@
-// Gamification Context - XP, Levels, Streaks, and Achievements
+// Gamification Context - XP, Levels, Streaks, and Achievements with Firestore Sync
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase/config';
 import { useAuth } from './AuthContext';
 
 const GamificationContext = createContext(null);
@@ -42,6 +44,19 @@ const ACHIEVEMENTS = [
     { id: 'priority_master', title: 'Priority Master', desc: 'Complete 10 high priority tasks', icon: '⭐', condition: (stats) => stats.highPriorityCompleted >= 10 },
 ];
 
+const DEFAULT_STATS = {
+    xp: 0,
+    totalCompleted: 0,
+    currentStreak: 0,
+    bestStreak: 0,
+    lastCompletedDate: null,
+    todayCompleted: 0,
+    highPriorityCompleted: 0,
+    earlyBirdCount: 0,
+    nightOwlCount: 0,
+    unlockedAchievements: [],
+};
+
 export const useGamification = () => {
     const context = useContext(GamificationContext);
     if (!context) {
@@ -57,51 +72,59 @@ export const GamificationProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : false;
     });
 
-    const [stats, setStats] = useState(() => {
-        const saved = localStorage.getItem('gamificationStats');
-        return saved ? JSON.parse(saved) : {
-            xp: 0,
-            totalCompleted: 0,
-            currentStreak: 0,
-            bestStreak: 0,
-            lastCompletedDate: null,
-            todayCompleted: 0,
-            highPriorityCompleted: 0,
-            earlyBirdCount: 0,
-            nightOwlCount: 0,
-            unlockedAchievements: [],
-        };
-    });
+    const [stats, setStats] = useState(DEFAULT_STATS);
+    const [loading, setLoading] = useState(true);
+    const [xpGain, setXpGain] = useState(null);
+    const [newAchievement, setNewAchievement] = useState(null);
+    const [levelUp, setLevelUp] = useState(null);
 
-    const [xpGain, setXpGain] = useState(null); // For XP animation
-    const [newAchievement, setNewAchievement] = useState(null); // For achievement popup
-    const [levelUp, setLevelUp] = useState(null); // For level up animation
-
-    // Save settings to localStorage
+    // Save gamification toggle to localStorage (this is a preference, not data)
     useEffect(() => {
         localStorage.setItem('gamificationEnabled', JSON.stringify(gamificationEnabled));
     }, [gamificationEnabled]);
 
+    // Subscribe to gamification stats from Firestore
     useEffect(() => {
-        localStorage.setItem('gamificationStats', JSON.stringify(stats));
-    }, [stats]);
-
-    // Reset user stats when user changes
-    useEffect(() => {
-        if (user) {
-            const userStats = localStorage.getItem(`gamificationStats_${user.uid}`);
-            if (userStats) {
-                setStats(JSON.parse(userStats));
-            }
+        if (!user) {
+            setStats(DEFAULT_STATS);
+            setLoading(false);
+            return;
         }
+
+        const userDocRef = doc(db, 'gamification', user.uid);
+
+        // Subscribe to real-time updates
+        const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                setStats(docSnap.data());
+            } else {
+                // Initialize with default stats for new users
+                setStats(DEFAULT_STATS);
+            }
+            setLoading(false);
+        }, (error) => {
+            console.error('Error subscribing to gamification stats:', error);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
     }, [user]);
 
-    // Save user-specific stats
-    useEffect(() => {
-        if (user) {
-            localStorage.setItem(`gamificationStats_${user.uid}`, JSON.stringify(stats));
+    // Save stats to Firestore whenever they change
+    const saveStatsToFirestore = useCallback(async (newStats) => {
+        if (!user) return;
+
+        try {
+            const userDocRef = doc(db, 'gamification', user.uid);
+            await setDoc(userDocRef, {
+                ...newStats,
+                userId: user.uid,
+                updatedAt: new Date().toISOString(),
+            }, { merge: true });
+        } catch (error) {
+            console.error('Error saving gamification stats:', error);
         }
-    }, [stats, user]);
+    }, [user]);
 
     // Get current level info
     const getCurrentLevel = useCallback(() => {
@@ -148,91 +171,93 @@ export const GamificationProvider = ({ children }) => {
 
     // Award XP for completing a task
     const awardTaskCompletion = useCallback((task) => {
-        if (!gamificationEnabled) return;
+        if (!gamificationEnabled || !user) return;
 
         const now = new Date();
         const today = now.toDateString();
         const hour = now.getHours();
+        const previousXP = stats.xp;
+        const previousLevel = getCurrentLevel();
 
-        setStats(prev => {
-            let xpGained = XP_REWARDS.COMPLETE_TASK;
-            const previousLevel = getCurrentLevel();
+        let xpGained = XP_REWARDS.COMPLETE_TASK;
 
-            // Bonus for high priority
-            if (task.priority === 1) {
-                xpGained += XP_REWARDS.COMPLETE_HIGH_PRIORITY;
-            }
+        // Bonus for high priority
+        if (task.priority === 1) {
+            xpGained += XP_REWARDS.COMPLETE_HIGH_PRIORITY;
+        }
 
-            // Bonus for subtasks
-            if (task.subtasks?.length > 0) {
-                xpGained += XP_REWARDS.COMPLETE_WITH_SUBTASKS;
-            }
+        // Bonus for subtasks
+        if (task.subtasks?.length > 0) {
+            xpGained += XP_REWARDS.COMPLETE_WITH_SUBTASKS;
+        }
 
-            let newStats = { ...prev };
-            newStats.xp += xpGained;
-            newStats.totalCompleted += 1;
+        let newStats = { ...stats };
+        newStats.xp += xpGained;
+        newStats.totalCompleted += 1;
 
-            // Check if first task today
-            if (prev.lastCompletedDate !== today) {
-                newStats.todayCompleted = 1;
-                xpGained += XP_REWARDS.FIRST_TASK_TODAY;
-                newStats.xp += XP_REWARDS.FIRST_TASK_TODAY;
+        // Check if first task today
+        if (stats.lastCompletedDate !== today) {
+            newStats.todayCompleted = 1;
+            xpGained += XP_REWARDS.FIRST_TASK_TODAY;
+            newStats.xp += XP_REWARDS.FIRST_TASK_TODAY;
 
-                // Update streak
-                const lastDate = prev.lastCompletedDate ? new Date(prev.lastCompletedDate) : null;
-                if (lastDate) {
-                    const yesterday = new Date(now);
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    if (lastDate.toDateString() === yesterday.toDateString()) {
-                        newStats.currentStreak += 1;
-                        if (newStats.currentStreak > newStats.bestStreak) {
-                            newStats.bestStreak = newStats.currentStreak;
-                        }
-                        // Streak bonus
-                        xpGained += XP_REWARDS.DAILY_STREAK;
-                        newStats.xp += XP_REWARDS.DAILY_STREAK;
-                    } else if (lastDate.toDateString() !== today) {
-                        newStats.currentStreak = 1;
+            // Update streak
+            const lastDate = stats.lastCompletedDate ? new Date(stats.lastCompletedDate) : null;
+            if (lastDate) {
+                const yesterday = new Date(now);
+                yesterday.setDate(yesterday.getDate() - 1);
+                if (lastDate.toDateString() === yesterday.toDateString()) {
+                    newStats.currentStreak += 1;
+                    if (newStats.currentStreak > newStats.bestStreak) {
+                        newStats.bestStreak = newStats.currentStreak;
                     }
-                } else {
+                    // Streak bonus
+                    xpGained += XP_REWARDS.DAILY_STREAK;
+                    newStats.xp += XP_REWARDS.DAILY_STREAK;
+                } else if (lastDate.toDateString() !== today) {
                     newStats.currentStreak = 1;
                 }
             } else {
-                newStats.todayCompleted += 1;
+                newStats.currentStreak = 1;
             }
+        } else {
+            newStats.todayCompleted += 1;
+        }
 
-            newStats.lastCompletedDate = today;
+        newStats.lastCompletedDate = today;
 
-            // Track time-based achievements
-            if (hour < 9) {
-                newStats.earlyBirdCount = (prev.earlyBirdCount || 0) + 1;
-            }
-            if (hour >= 22) {
-                newStats.nightOwlCount = (prev.nightOwlCount || 0) + 1;
-            }
+        // Track time-based achievements
+        if (hour < 9) {
+            newStats.earlyBirdCount = (stats.earlyBirdCount || 0) + 1;
+        }
+        if (hour >= 22) {
+            newStats.nightOwlCount = (stats.nightOwlCount || 0) + 1;
+        }
 
-            // Track priority tasks
-            if (task.priority === 1) {
-                newStats.highPriorityCompleted = (prev.highPriorityCompleted || 0) + 1;
-            }
+        // Track priority tasks
+        if (task.priority === 1) {
+            newStats.highPriorityCompleted = (stats.highPriorityCompleted || 0) + 1;
+        }
 
-            // Check for achievements
-            newStats = checkAchievements(newStats);
+        // Check for achievements
+        newStats = checkAchievements(newStats);
 
-            // Show XP animation
-            setXpGain({ amount: xpGained, x: Math.random() * 100, y: Math.random() * 100 });
-            setTimeout(() => setXpGain(null), 1500);
+        // Show XP animation
+        setXpGain({ amount: xpGained, x: Math.random() * 100, y: Math.random() * 100 });
+        setTimeout(() => setXpGain(null), 1500);
 
-            // Check for level up
-            const newLevel = LEVELS.find(l => newStats.xp >= l.minXP && stats.xp < l.minXP);
-            if (newLevel && newLevel.level > previousLevel.level) {
-                setLevelUp(newLevel);
-                setTimeout(() => setLevelUp(null), 3000);
-            }
+        // Check for level up
+        const newLevel = LEVELS.find(l => newStats.xp >= l.minXP && previousXP < l.minXP);
+        if (newLevel && newLevel.level > previousLevel.level) {
+            setLevelUp(newLevel);
+            setTimeout(() => setLevelUp(null), 3000);
+        }
 
-            return newStats;
-        });
-    }, [gamificationEnabled, getCurrentLevel, checkAchievements, stats.xp]);
+        // Update local state and save to Firestore
+        setStats(newStats);
+        saveStatsToFirestore(newStats);
+
+    }, [gamificationEnabled, user, stats, getCurrentLevel, checkAchievements, saveStatsToFirestore]);
 
     // Toggle gamification mode
     const toggleGamification = useCallback(() => {
@@ -251,6 +276,7 @@ export const GamificationProvider = ({ children }) => {
         gamificationEnabled,
         toggleGamification,
         stats,
+        loading,
         xpGain,
         newAchievement,
         levelUp,
