@@ -2,15 +2,22 @@
 import { useState } from 'react';
 import { format, isToday, isTomorrow, isPast, isThisWeek } from 'date-fns';
 import { useTasks } from '../../context/TaskContext';
+import { useGamification } from '../../context/GamificationContext';
 import './TaskItem.css';
 
 const TaskItem = ({ task, onEdit }) => {
     const { toggleTaskComplete, updateTask, deleteTask, labels } = useTasks();
+    const { awardTaskCompletion } = useGamification();
     const [isHovered, setIsHovered] = useState(false);
 
     const handleComplete = async (e) => {
         e.stopPropagation();
-        await toggleTaskComplete(task.id, !task.completed);
+        const nowCompleting = !task.completed;
+        await toggleTaskComplete(task.id, nowCompleting);
+        // Award XP when completing (not uncompleting)
+        if (nowCompleting) {
+            awardTaskCompletion(task);
+        }
     };
 
     const handleMyDayToggle = async (e) => {

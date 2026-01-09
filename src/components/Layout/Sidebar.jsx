@@ -4,7 +4,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTasks } from '../../context/TaskContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useGamification } from '../../context/GamificationContext';
 import { signOut } from '../../firebase/auth';
+import GamificationPanel from '../Gamification/GamificationPanel';
 import './Sidebar.css';
 
 // Icons as components
@@ -86,6 +88,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
     const { user } = useAuth();
     const { labels, getTasksByFilter, getOverdueTasks } = useTasks();
     const { theme, toggleTheme } = useTheme();
+    const { gamificationEnabled, toggleGamification } = useGamification();
     const [labelsExpanded, setLabelsExpanded] = useState(true);
 
     const smartLists = [
@@ -153,6 +156,13 @@ const Sidebar = ({ isOpen, onToggle }) => {
                                 <span className="sidebar-user-email">{user.email}</span>
                             </div>
                             <div className="sidebar-user-actions">
+                                <button
+                                    className={`user-action-btn ${gamificationEnabled ? 'active' : ''}`}
+                                    onClick={toggleGamification}
+                                    title={gamificationEnabled ? 'Disable Game Mode' : 'Enable Game Mode'}
+                                >
+                                    🎮
+                                </button>
                                 <button className="user-action-btn" onClick={toggleTheme} title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}>
                                     {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
                                 </button>
@@ -170,6 +180,9 @@ const Sidebar = ({ isOpen, onToggle }) => {
                             <span>overdue task{overdueCount !== 1 ? 's' : ''}</span>
                         </div>
                     )}
+
+                    {/* Gamification Panel */}
+                    <GamificationPanel />
 
                     {/* Smart Lists */}
                     <nav className="sidebar-nav">
