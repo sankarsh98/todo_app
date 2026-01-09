@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useGamification } from '../../context/GamificationContext';
 import { signOut } from '../../firebase/auth';
 import GamificationPanel from '../Gamification/GamificationPanel';
+import ThemeSelector from './ThemeSelector';
 import './Sidebar.css';
 
 // Icons as components
@@ -242,7 +243,10 @@ const Sidebar = ({ isOpen, onToggle }) => {
                     </div>
                 </div>
 
-
+                {/* Theme Selector */}
+                <div className="sidebar-footer">
+                    <ThemeSelector />
+                </div>
             </aside>
         </>
     );
