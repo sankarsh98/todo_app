@@ -144,6 +144,9 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 </div>
 
                 <div className="sidebar-content">
+                    {/* Theme Selector at Top */}
+                    <ThemeSelector />
+
                     {/* User Profile */}
                     {user && (
                         <div className="sidebar-user">
@@ -241,11 +244,6 @@ const Sidebar = ({ isOpen, onToggle }) => {
                             </div>
                         )}
                     </div>
-                </div>
-
-                {/* Theme Selector */}
-                <div className="sidebar-footer">
-                    <ThemeSelector />
                 </div>
             </aside>
         </>
