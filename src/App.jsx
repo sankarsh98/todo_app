@@ -21,6 +21,7 @@ import Completed from './views/Completed';
 import LabelView from './views/LabelView';
 import Labels from './views/Labels';
 import Summary from './views/Summary';
+import Calendar from './views/Calendar';
 
 // Loading Spinner
 const LoadingScreen = () => (
@@ -111,6 +112,7 @@ const AppLayout = () => {
                 <Route path="/all" element={<AllTasks />} />
                 <Route path="/completed" element={<Completed />} />
                 <Route path="/summary" element={<Summary />} />
+                <Route path="/calendar" element={<Calendar />} />
                 <Route path="/labels" element={<Labels />} />
                 <Route path="/label/:labelId" element={<LabelView />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
