@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useTasks } from '../context/TaskContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 import QuickAdd from '../components/Tasks/QuickAdd';
 import TaskList from '../components/Tasks/TaskList';
 import TaskModal from '../components/Tasks/TaskModal';
@@ -9,8 +10,9 @@ import './Views.css';
 
 const MyDay = () => {
     const { getTasksByFilter, getOverdueTasks } = useTasks();
+    const isMobile = useIsMobile();
     const [selectedTask, setSelectedTask] = useState(null);
-    const [quickAddOpen, setQuickAddOpen] = useState(true);
+    const [quickAddOpen, setQuickAddOpen] = useState(!isMobile);
 
     const myDayTasks = getTasksByFilter('myday');
     const overdueTasks = getOverdueTasks();

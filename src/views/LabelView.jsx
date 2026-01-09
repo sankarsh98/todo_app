@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTasks } from '../context/TaskContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 import QuickAdd from '../components/Tasks/QuickAdd';
 import TaskList from '../components/Tasks/TaskList';
 import TaskModal from '../components/Tasks/TaskModal';
@@ -10,8 +11,9 @@ import './Views.css';
 const LabelView = () => {
     const { labelId } = useParams();
     const { getTasksByLabel, labels } = useTasks();
+    const isMobile = useIsMobile();
     const [selectedTask, setSelectedTask] = useState(null);
-    const [quickAddOpen, setQuickAddOpen] = useState(true);
+    const [quickAddOpen, setQuickAddOpen] = useState(!isMobile);
 
     const label = labels.find(l => l.id === labelId);
     const tasks = getTasksByLabel(labelId);

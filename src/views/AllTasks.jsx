@@ -1,6 +1,7 @@
 // All Tasks View with Label Filters
 import { useState, useEffect } from 'react';
 import { useTasks } from '../context/TaskContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 import QuickAdd from '../components/Tasks/QuickAdd';
 import TaskList from '../components/Tasks/TaskList';
 import TaskModal from '../components/Tasks/TaskModal';
@@ -8,8 +9,9 @@ import './Views.css';
 
 const AllTasks = () => {
     const { getTasksByFilter, labels } = useTasks();
+    const isMobile = useIsMobile();
     const [selectedTask, setSelectedTask] = useState(null);
-    const [quickAddOpen, setQuickAddOpen] = useState(true);
+    const [quickAddOpen, setQuickAddOpen] = useState(!isMobile);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedLabels, setSelectedLabels] = useState([]);
 
