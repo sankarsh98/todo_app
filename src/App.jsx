@@ -18,6 +18,7 @@ import AllTasks from './views/AllTasks';
 import Completed from './views/Completed';
 import LabelView from './views/LabelView';
 import Labels from './views/Labels';
+import Summary from './views/Summary';
 
 // Loading Spinner
 const LoadingScreen = () => (
@@ -106,6 +107,7 @@ const AppLayout = () => {
               <Route path="/upcoming" element={<Upcoming />} />
               <Route path="/all" element={<AllTasks />} />
               <Route path="/completed" element={<Completed />} />
+              <Route path="/summary" element={<Summary />} />
               <Route path="/labels" element={<Labels />} />
               <Route path="/label/:labelId" element={<LabelView />} />
               <Route path="*" element={<Navigate to="/" replace />} />
