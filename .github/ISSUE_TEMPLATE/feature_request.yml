@@ -1,0 +1,66 @@
+name: Feature Request
+description: Propose a new feature for TaskFlow
+title: "[Feature]: "
+labels: ["feature", "needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚀 Feature Request
+        
+        Thank you for suggesting a new feature! Please fill out the details below.
+        
+        **Note:** When this issue is labeled with both `feature` and `approved`, and then closed, it will trigger an automatic deployment.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of the feature you'd like.
+      placeholder: "Describe the feature..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Why would this feature be useful? Who would benefit?
+      placeholder: "Explain the use case..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Suggested Implementation
+      description: Optional - how do you think this could be implemented?
+      placeholder: "Technical suggestions..."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature?
+      options:
+        - Low - Nice to have
+        - Medium - Would improve experience
+        - High - Important for usability
+        - Critical - Blocking issue
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: category
+    attributes:
+      label: Category
+      description: What area does this feature affect?
+      options:
+        - label: Task Management
+        - label: User Interface
+        - label: Mobile Experience
+        - label: Sync/Performance
+        - label: Authentication
+        - label: Other

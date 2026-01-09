@@ -1,0 +1,69 @@
+# Auto-deploy features when issues are approved and closed
+# Triggered when issues with "feature" and "approved" labels are closed
+name: Feature Auto-Deploy
+
+on:
+  issues:
+    types: [closed]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  check-and-deploy:
+    # Only run if the issue has both 'feature' and 'approved' labels
+    if: |
+      contains(github.event.issue.labels.*.name, 'feature') && 
+      contains(github.event.issue.labels.*.name, 'approved')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Log approved feature
+        run: |
+          echo "🚀 Feature approved and closed: ${{ github.event.issue.title }}"
+          echo "Issue #${{ github.event.issue.number }}"
+          echo "Initiating deployment..."
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+
+      - name: Comment on issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ **Deployment Complete!**\n\nThis feature has been deployed to production.\n\n🔗 Live at: https://just-do-it-task-flow.web.app'
+            })

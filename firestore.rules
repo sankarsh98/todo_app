@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Tasks collection - users can only access their own tasks
+    match /tasks/{taskId} {
+      // Allow read if authenticated and document belongs to user
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Allow create if authenticated and setting userId to own uid
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Allow update/delete if authenticated and document belongs to user
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Labels collection - users can only access their own labels
+    match /labels/{labelId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+  }
+}
