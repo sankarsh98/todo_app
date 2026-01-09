@@ -73,7 +73,8 @@ const Calendar = () => {
     };
 
     const getTasksForDate = (date) => {
-        const dateKey = format(date, 'yyyy-MM-dd');
+        if (!date) return [];
+        const dateKey = format(new Date(date), 'yyyy-MM-dd');
         return tasksByDate[dateKey] || [];
     };
 
