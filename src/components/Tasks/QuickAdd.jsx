@@ -4,7 +4,7 @@ import { useTasks } from '../../context/TaskContext';
 import { useNaturalLanguage } from '../../hooks/useNaturalLanguage';
 import './QuickAdd.css';
 
-const QuickAdd = ({ isOpen, onClose, defaultInMyDay = false, defaultLabels = [] }) => {
+const QuickAdd = ({ isOpen, onClose, defaultInMyDay = false, defaultLabels = [], defaultDate = null }) => {
     const [input, setInput] = useState('');
     const [parsedPreview, setParsedPreview] = useState(null);
     const inputRef = useRef(null);
@@ -75,7 +75,7 @@ const QuickAdd = ({ isOpen, onClose, defaultInMyDay = false, defaultLabels = [] 
 
         await createTask({
             title: parsed.title,
-            dueDate: parsed.dueDate,
+            dueDate: parsed.dueDate || defaultDate,
             priority: parsed.priority,
             labels: labelIds,
             inMyDay: defaultInMyDay,

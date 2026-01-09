@@ -437,7 +437,7 @@
     }
 
     .calendar-day {
-        min-height: 80px;
+        min-height: 70px;
         padding: var(--space-1);
     }
 
@@ -446,34 +446,90 @@
     }
 
     .calendar-task {
-        font-size: 10px;
+        font-size: 9px;
         padding: 2px 4px;
+        border-left-width: 2px;
+    }
+
+    .calendar-task .task-title {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
     }
 
     .calendar-weekday {
         font-size: var(--font-size-xs);
         padding: var(--space-2);
     }
+
+    .day-tasks {
+        gap: 2px;
+    }
+
+    /* Show only 2 tasks on mobile */
+    .calendar-task:nth-child(n+3) {
+        display: none;
+    }
+
+    .more-tasks {
+        font-size: 9px;
+        padding: 2px;
+    }
 }
 
 @media (max-width: 480px) {
     .calendar-day {
-        min-height: 60px;
+        min-height: 55px;
     }
 
+    /* On very small screens, show dots instead of task cards */
     .day-tasks {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 3px;
+        justify-content: center;
+        align-items: center;
+        margin-top: var(--space-1);
+    }
+
+    .calendar-task {
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        padding: 0;
+        border-radius: 50%;
+        border: none;
+        background: var(--color-primary);
+    }
+
+    .calendar-task .task-title {
         display: none;
     }
 
-    .calendar-day.has-tasks::after {
-        content: '';
-        position: absolute;
-        bottom: 4px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 6px;
-        height: 6px;
-        background: var(--color-primary);
-        border-radius: 50%;
+    /* Priority colors for dots */
+    .calendar-task[style*="priority-1"] {
+        background: var(--color-priority-1);
+    }
+
+    .calendar-task[style*="priority-2"] {
+        background: var(--color-priority-2);
+    }
+
+    .calendar-task[style*="priority-3"] {
+        background: var(--color-priority-3);
+    }
+
+    .more-tasks {
+        font-size: 8px;
+        padding: 0;
+        width: 100%;
+    }
+
+    .add-task-btn {
+        opacity: 1;
+        width: 16px;
+        height: 16px;
+        font-size: 12px;
     }
 }
