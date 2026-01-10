@@ -6,7 +6,6 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import QuickAdd from '../components/Tasks/QuickAdd';
 import TaskList from '../components/Tasks/TaskList';
 import TaskModal from '../components/Tasks/TaskModal';
-import DailySummary from '../components/Tasks/DailySummary';
 import './Views.css';
 
 const MyDay = () => {
@@ -43,8 +42,6 @@ const MyDay = () => {
                     </svg>
                 </div>
             </div>
-
-            <DailySummary tasks={myDayTasks} />
 
             <QuickAdd
                 isOpen={quickAddOpen}
