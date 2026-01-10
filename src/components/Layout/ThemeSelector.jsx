@@ -1,6 +1,8 @@
 // Theme Selector Component with Mascots and Animations
 import { useState } from 'react';
 import { useTheme, THEMES } from '../../context/ThemeContext';
+import pikachuIcon from '../../assets/pikachu.svg';
+import useSound from '../../hooks/useSound';
 import './ThemeSelector.css';
 
 // Theme mascots - playful characters for each theme
@@ -12,13 +14,14 @@ const MASCOTS = {
     mountain: { emoji: '🦅', name: 'Summit', greeting: 'Reach new heights!' },
     ocean: { emoji: '🐬', name: 'Splash', greeting: 'Dive deep!' },
     space: { emoji: '👽', name: 'Cosmo', greeting: 'To infinity!' },
-    pokemon: { emoji: '⚡', name: 'Sparky', greeting: 'Pika Pika!' },
+    pokemon: { emoji: pikachuIcon, name: 'Sparky', greeting: 'Pika Pika!', isImage: true },
 };
 
 const ThemeSelector = () => {
     const { theme, setTheme, getCurrentTheme } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
     const [showMascot, setShowMascot] = useState(false);
+    const { playThemeSwitch } = useSound();
 
     const currentTheme = getCurrentTheme();
     const mascot = MASCOTS[theme] || MASCOTS.light;
@@ -26,9 +29,17 @@ const ThemeSelector = () => {
     const handleThemeChange = (themeId) => {
         setTheme(themeId);
         setIsOpen(false);
+        playThemeSwitch();
         // Show mascot greeting
         setShowMascot(true);
         setTimeout(() => setShowMascot(false), 2000);
+    };
+
+    const renderMascotIcon = (mascotData, className = "") => {
+        if (mascotData?.isImage) {
+            return <img src={mascotData.emoji} alt={mascotData.name} className={`mascot-image ${className}`} />;
+        }
+        return <span className={`theme-mascot-icon ${className}`}>{mascotData?.emoji}</span>;
     };
 
     return (
@@ -38,7 +49,7 @@ const ThemeSelector = () => {
                 onClick={() => setIsOpen(!isOpen)}
                 title="Change Theme"
             >
-                <span className="theme-mascot-icon bounce">{mascot.emoji}</span>
+                {renderMascotIcon(mascot, "bounce")}
                 <div className="theme-trigger-content">
                     <span className="theme-name">{currentTheme.name}</span>
                     <span className="theme-mascot-name">with {mascot.name}</span>
@@ -59,7 +70,7 @@ const ThemeSelector = () => {
             {/* Mascot Greeting Popup */}
             {showMascot && (
                 <div className="mascot-greeting">
-                    <span className="mascot-greeting-emoji wiggle">{mascot.emoji}</span>
+                    {renderMascotIcon(mascot, "wiggle")}
                     <span className="mascot-greeting-text">{mascot.greeting}</span>
                 </div>
             )}
@@ -79,7 +90,7 @@ const ThemeSelector = () => {
                                     onClick={() => handleThemeChange(t.id)}
                                 >
                                     <div className="theme-option-mascot">
-                                        <span className="mascot-emoji float">{themeMascot?.emoji}</span>
+                                        {renderMascotIcon(themeMascot, "float")}
                                     </div>
                                     <div className="theme-option-info">
                                         <span className="theme-option-name">

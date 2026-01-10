@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTasks } from '../../context/TaskContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useNaturalLanguage } from '../../hooks/useNaturalLanguage';
+import useSound from '../../hooks/useSound';
 import './QuickAdd.css';
 
 const QuickAdd = ({ isOpen, onClose, defaultInMyDay = false, defaultLabels = [], defaultDate = null }) => {
@@ -12,6 +13,7 @@ const QuickAdd = ({ isOpen, onClose, defaultInMyDay = false, defaultLabels = [],
     const { createTask, createLabel, labels } = useTasks();
     const { setTheme } = useTheme();
     const { parseInput } = useNaturalLanguage();
+    const { playClick, playThemeSwitch } = useSound();
 
     useEffect(() => {
         if (isOpen && inputRef.current) {
@@ -49,6 +51,7 @@ const QuickAdd = ({ isOpen, onClose, defaultInMyDay = false, defaultLabels = [],
         // Easter Egg: Catch 'em all
         if (input.trim().toLowerCase() === "catch 'em all") {
             setTheme('pokemon');
+            playThemeSwitch();
             setInput('');
             setParsedPreview(null);
             alert('🔴 Gotta catch \'em all! Pokemon theme unlocked!');
@@ -94,6 +97,7 @@ const QuickAdd = ({ isOpen, onClose, defaultInMyDay = false, defaultLabels = [],
             recurring: parsed.recurring,
         });
 
+        playClick();
         setInput('');
         setParsedPreview(null);
         // Don't close QuickAdd after adding - keep it open for more tasks

@@ -3,11 +3,13 @@ import { useState } from 'react';
 import { format, isToday, isTomorrow, isPast, isThisWeek } from 'date-fns';
 import { useTasks } from '../../context/TaskContext';
 import { useGamification } from '../../context/GamificationContext';
+import useSound from '../../hooks/useSound';
 import './TaskItem.css';
 
 const TaskItem = ({ task, onEdit }) => {
     const { toggleTaskComplete, updateTask, deleteTask, labels } = useTasks();
     const { awardTaskCompletion } = useGamification();
+    const { playSuccess, playRemove } = useSound();
     const [isHovered, setIsHovered] = useState(false);
 
     const handleComplete = async (e) => {
@@ -17,6 +19,7 @@ const TaskItem = ({ task, onEdit }) => {
         // Award XP when completing (not uncompleting)
         if (nowCompleting) {
             awardTaskCompletion(task);
+            playSuccess();
         }
     };
 
@@ -28,6 +31,7 @@ const TaskItem = ({ task, onEdit }) => {
     const handleDelete = async (e) => {
         e.stopPropagation();
         if (window.confirm('Delete this task?')) {
+            playRemove();
             await deleteTask(task.id);
         }
     };
