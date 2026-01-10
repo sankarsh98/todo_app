@@ -332,6 +332,60 @@
     flex-shrink: 0;
 }
 
+.theme-preferences {
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-tertiary);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.preference-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.preference-toggle {
+    width: 44px;
+    height: 24px;
+    background: var(--bg-hover);
+    border-radius: var(--radius-full);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+}
+
+.preference-toggle.active {
+    background: var(--color-primary);
+}
+
+.toggle-handle {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+.preference-toggle.active .toggle-handle {
+    transform: translateX(20px);
+}
+
+.preference-status {
+    font-size: var(--font-size-xs);
+    color: var(--color-success);
+    font-weight: var(--font-weight-medium);
+}
+
 /* Theme-specific decorations */
 .theme-forest .theme-selector-trigger {
     background: linear-gradient(135deg, #0a1f0a 0%, #14291a 100%);

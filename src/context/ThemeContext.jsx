@@ -5,14 +5,15 @@ const ThemeContext = createContext(null);
 
 // Available themes with their display info
 export const THEMES = [
-    { id: 'light', name: 'Light', icon: '☀️', description: 'Clean and bright' },
-    { id: 'dark', name: 'Dark', icon: '🌙', description: 'Easy on the eyes' },
+    { id: 'light', name: 'Light', icon: '', description: 'Clean and bright' },
+    { id: 'dark', name: 'Dark', icon: '', description: 'Easy on the eyes' },
     { id: 'forest', name: 'Forest', icon: '🌲', description: 'Earthy greens' },
     { id: 'desert', name: 'Desert', icon: '🏜️', description: 'Warm sands' },
     { id: 'mountain', name: 'Mountain', icon: '🏔️', description: 'Cool grays' },
     { id: 'ocean', name: 'Ocean', icon: '🌊', description: 'Deep blues' },
     { id: 'space', name: 'Space', icon: '🚀', description: 'Cosmic purple' },
     { id: 'pokemon', name: 'Pokemon', icon: '🔴', description: 'Gotta catch \'em all!' },
+    { id: 'pacman', name: 'Pacman', icon: '🍒', description: 'Waka Waka!' },
 ];
 
 export const useTheme = () => {
@@ -36,11 +37,20 @@ export const ThemeProvider = ({ children }) => {
         return 'light';
     });
 
+    const [soundEnabled, setSoundEnabled] = useState(() => {
+        const saved = localStorage.getItem('soundEnabled');
+        return saved !== null ? JSON.parse(saved) : true;
+    });
+
     useEffect(() => {
         // Apply theme to document
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
     }, [theme]);
+
+    useEffect(() => {
+        localStorage.setItem('soundEnabled', JSON.stringify(soundEnabled));
+    }, [soundEnabled]);
 
     // Listen for system preference changes only if on light/dark
     useEffect(() => {
@@ -62,6 +72,10 @@ export const ThemeProvider = ({ children }) => {
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
     };
 
+    const toggleSound = () => {
+        setSoundEnabled(prev => !prev);
+    };
+
     // Set a specific theme
     const setSpecificTheme = (themeId) => {
         if (THEMES.find(t => t.id === themeId)) {
@@ -81,6 +95,8 @@ export const ThemeProvider = ({ children }) => {
         getCurrentTheme,
         themes: THEMES,
         isDark: theme !== 'light' && theme !== 'desert', // Most themes are dark-ish
+        soundEnabled,
+        toggleSound,
     };
 
     return (

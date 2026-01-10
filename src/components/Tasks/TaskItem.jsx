@@ -39,11 +39,16 @@ const TaskItem = ({ task, onEdit }) => {
     const formatDueDate = (date) => {
         if (!date) return null;
         const d = new Date(date);
+        const timeStr = format(d, 'p');
+        const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
 
-        if (isToday(d)) return 'Today';
-        if (isTomorrow(d)) return 'Tomorrow';
-        if (isThisWeek(d)) return format(d, 'EEEE');
-        return format(d, 'MMM d');
+        let dateStr = '';
+        if (isToday(d)) dateStr = 'Today';
+        else if (isTomorrow(d)) dateStr = 'Tomorrow';
+        else if (isThisWeek(d)) dateStr = format(d, 'EEEE');
+        else dateStr = format(d, 'MMM d');
+        
+        return hasTime ? `${dateStr}, ${timeStr}` : dateStr;
     };
 
     const getDueDateClass = (date) => {

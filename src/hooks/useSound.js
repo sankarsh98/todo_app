@@ -1,7 +1,12 @@
 import { useCallback } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 export const useSound = () => {
+    const { soundEnabled } = useTheme();
+
     const playTone = useCallback((frequency, type, duration, volume = 0.1) => {
+        if (!soundEnabled) return;
+        
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) return;
 
@@ -20,27 +25,31 @@ export const useSound = () => {
 
         osc.start();
         osc.stop(ctx.currentTime + duration);
-    }, []);
+    }, [soundEnabled]);
 
     const playSuccess = useCallback(() => {
+        if (!soundEnabled) return;
         // C5 - E5 - G5 (Major Triad)
         setTimeout(() => playTone(523.25, 'sine', 0.1, 0.1), 0);
         setTimeout(() => playTone(659.25, 'sine', 0.1, 0.1), 100);
         setTimeout(() => playTone(783.99, 'sine', 0.3, 0.1), 200);
-    }, [playTone]);
+    }, [playTone, soundEnabled]);
 
     const playClick = useCallback(() => {
+        if (!soundEnabled) return;
         // Short high blip
         playTone(800, 'sine', 0.05, 0.05);
-    }, [playTone]);
+    }, [playTone, soundEnabled]);
 
     const playRemove = useCallback(() => {
+        if (!soundEnabled) return;
         // Descending
         setTimeout(() => playTone(400, 'square', 0.1, 0.05), 0);
         setTimeout(() => playTone(300, 'square', 0.2, 0.05), 100);
-    }, [playTone]);
+    }, [playTone, soundEnabled]);
 
     const playThemeSwitch = useCallback(() => {
+        if (!soundEnabled) return;
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) return;
         const ctx = new AudioContext();
@@ -58,7 +67,7 @@ export const useSound = () => {
         gain.connect(ctx.destination);
         osc.start();
         osc.stop(ctx.currentTime + 0.3);
-    }, []);
+    }, [soundEnabled]);
 
     return {
         playSuccess,

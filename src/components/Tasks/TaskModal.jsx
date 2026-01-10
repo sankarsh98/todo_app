@@ -166,8 +166,8 @@ const TaskModal = ({ task, isOpen, onClose }) => {
                                 Due Date
                             </label>
                             <input
-                                type="date"
-                                value={editedTask.dueDate ? format(new Date(editedTask.dueDate), 'yyyy-MM-dd') : ''}
+                                type="datetime-local"
+                                value={editedTask.dueDate ? format(new Date(editedTask.dueDate), "yyyy-MM-dd'T'HH:mm") : ''}
                                 onChange={e => setEditedTask({
                                     ...editedTask,
                                     dueDate: e.target.value ? new Date(e.target.value) : null

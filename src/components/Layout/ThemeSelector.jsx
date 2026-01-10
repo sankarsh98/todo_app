@@ -14,12 +14,16 @@ const MASCOTS = {
     ocean: { emoji: '🐬', name: 'Splash', greeting: 'Dive deep!' },
     space: { emoji: '👽', name: 'Cosmo', greeting: 'To infinity!' },
     pokemon: { emoji: '⚡', name: 'Sparky', greeting: 'Pika Pika!' },
+    pacman: { emoji: '🍒', name: 'Waka', greeting: 'Nom nom nom!' },
 };
 
 const ThemeSelector = () => {
-    const { theme, setTheme, getCurrentTheme } = useTheme();
+    const { theme, setTheme, getCurrentTheme, soundEnabled, toggleSound } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
     const [showMascot, setShowMascot] = useState(false);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(
+        "Notification" in window && Notification.permission === "granted"
+    );
     
     // Sound effects
     const { playClick, playThemeSwitch, playSuccess } = useSound();
@@ -43,12 +47,26 @@ const ThemeSelector = () => {
         setIsOpen(!isOpen);
     };
 
+    const requestNotifications = async () => {
+        if (!("Notification" in window)) {
+            alert("This browser does not support desktop notifications");
+            return;
+        }
+        
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+            setNotificationsEnabled(true);
+            new Notification("Notifications enabled!", { body: "You will now receive reminders for your tasks." });
+            playSuccess();
+        }
+    };
+
     return (
         <div className={`theme-selector theme-${theme}`}>
             <button
                 className="theme-selector-trigger"
                 onClick={toggleOpen}
-                title="Change Theme"
+                title="Change Theme & Settings"
             >
                 <span className="theme-mascot-icon bounce">{mascot.emoji}</span>
                 <div className="theme-trigger-content">
@@ -112,6 +130,29 @@ const ThemeSelector = () => {
                             );
                         })}
                     </div>
+                    
+                    <div className="theme-preferences">
+                        <div className="preference-item">
+                            <span>🔊 Sounds</span>
+                            <button 
+                                className={`preference-toggle ${soundEnabled ? 'active' : ''}`}
+                                onClick={toggleSound}
+                            >
+                                <div className="toggle-handle" />
+                            </button>
+                        </div>
+                        <div className="preference-item">
+                            <span>🔔 Reminders</span>
+                            {notificationsEnabled ? (
+                                <span className="preference-status">On</span>
+                            ) : (
+                                <button className="btn-xs btn-primary" onClick={requestNotifications}>
+                                    Enable
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
                     <div className="theme-dropdown-footer">
                         <span className="sparkles">✨</span> Pick a theme, pick a friend! <span className="sparkles">✨</span>
                     </div>

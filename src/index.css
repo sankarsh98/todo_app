@@ -290,6 +290,36 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(239, 68, 68, 0.1);
 }
 
+/* Pacman Theme - Retro Arcade */
+[data-theme="pacman"] {
+  --color-primary: #FFFF00; /* Pacman Yellow */
+  --color-primary-hover: #E6E600;
+  --color-primary-light: #333300;
+  --color-secondary: #00FFFF; /* Inky Blue */
+  --color-accent: #FF00FF; /* Pinky Pink */
+
+  --bg-primary: #000000; /* Black */
+  --bg-secondary: #111111;
+  --bg-tertiary: #1919a6; /* Maze Blue */
+  --bg-hover: #333333;
+  --bg-overlay: rgba(0, 0, 0, 0.9);
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #CCCCCC;
+  --text-tertiary: #999999;
+  --text-inverse: #000000;
+
+  --border-light: #1919a6;
+  --border-medium: #0000FF;
+
+  --shadow-sm: 0 1px 2px rgba(25, 25, 166, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(25, 25, 166, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(25, 25, 166, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(25, 25, 166, 0.6);
+  
+  --font-family: 'Courier New', monospace; /* Retro feel */
+}
+
 /* Reset & Base Styles */
 *,
 *::before,

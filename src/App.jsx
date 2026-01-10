@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { TaskProvider } from './context/TaskContext';
+import { TaskProvider, useTasks } from './context/TaskContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { GamificationProvider } from './context/GamificationContext';
 import { useKonamiCode } from './hooks/useKonamiCode';
@@ -31,6 +31,39 @@ const LoadingScreen = () => (
     <p>Loading TaskFlow...</p>
   </div>
 );
+
+const NotificationChecker = () => {
+    const { tasks } = useTasks();
+
+    useEffect(() => {
+        const checkReminders = () => {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+            const now = new Date();
+            tasks.forEach(task => {
+                if (!task.dueDate || task.completed) return;
+                const due = new Date(task.dueDate);
+                const diff = due.getTime() - now.getTime();
+                
+                // Notify if due within the next minute (0 to 60000ms)
+                if (diff > 0 && diff <= 60000) {
+                     new Notification(`Task Due: ${task.title}`, {
+                        body: task.description || "It's time!",
+                        icon: "/favicon.svg",
+                        tag: `task-${task.id}`
+                     });
+                }
+            });
+        };
+
+        const interval = setInterval(checkReminders, 10000); // Check every 10 seconds for better precision
+        // checkReminders(); // Don't run immediately to avoid spam on load if just opened
+
+        return () => clearInterval(interval);
+    }, [tasks]);
+
+    return null;
+};
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -81,6 +114,7 @@ const AppLayout = () => {
   return (
     <TaskProvider>
       <GamificationProvider>
+        <NotificationChecker />
         <div className="app-container">
           <Sidebar
             isOpen={sidebarOpen}
