@@ -14,6 +14,23 @@ googleProvider.setCustomParameters({
 });
 
 /**
+ * Request Gmail permissions
+ * @returns {Promise<string>} The Google Access Token
+ */
+export const requestGmailPermissions = async () => {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/gmail.readonly');
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        return credential.accessToken;
+    } catch (error) {
+        console.error('Error requesting Gmail permissions:', error);
+        throw error;
+    }
+};
+
+/**
  * Sign in with Google
  * @returns {Promise<import('firebase/auth').UserCredential>}
  */
