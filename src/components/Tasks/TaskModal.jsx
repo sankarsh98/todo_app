@@ -14,6 +14,7 @@ const TaskModal = ({ task, isOpen, onClose }) => {
 
     useEffect(() => {
         if (task && isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setEditedTask({ ...task });
         }
     }, [task, isOpen]);

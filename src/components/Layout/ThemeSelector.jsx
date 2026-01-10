@@ -1,6 +1,7 @@
 // Theme Selector Component with Mascots and Animations
-import { useState, useEffect } from 'react';
-import { useTheme, THEMES } from '../../context/ThemeContext';
+import { useState } from 'react';
+import { useTheme } from '../../context/ThemeContext';
+import { THEMES } from '../../constants/themes';
 import useSound from '../../hooks/useSound';
 import './ThemeSelector.css';
 

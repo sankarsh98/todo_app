@@ -243,7 +243,7 @@ export const GamificationProvider = ({ children }) => {
         newStats = checkAchievements(newStats);
 
         // Show XP animation
-        setXpGain({ amount: xpGained, x: Math.random() * 100, y: Math.random() * 100 });
+        setXpGain({ id: Date.now(), amount: xpGained, x: Math.random() * 100, y: Math.random() * 100 });
         setTimeout(() => setXpGain(null), 1500);
 
         // Check for level up

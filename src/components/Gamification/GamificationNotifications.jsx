@@ -11,7 +11,7 @@ const GamificationNotifications = () => {
         <>
             {/* XP Gain Animation */}
             {xpGain && (
-                <div className="xp-popup" key={Date.now()}>
+                <div className="xp-popup" key={xpGain.id}>
                     <span className="xp-amount">+{xpGain.amount} XP</span>
                 </div>
             )}
