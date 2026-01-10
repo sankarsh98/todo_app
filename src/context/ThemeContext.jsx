@@ -12,6 +12,7 @@ export const THEMES = [
     { id: 'mountain', name: 'Mountain', icon: '🏔️', description: 'Cool grays' },
     { id: 'ocean', name: 'Ocean', icon: '🌊', description: 'Deep blues' },
     { id: 'space', name: 'Space', icon: '🚀', description: 'Cosmic purple' },
+    { id: 'pokemon', name: 'Pokemon', icon: '🔴', description: 'Gotta catch \'em all!' },
 ];
 
 export const useTheme = () => {

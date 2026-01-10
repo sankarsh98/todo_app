@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TaskProvider } from './context/TaskContext';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { GamificationProvider } from './context/GamificationContext';
+import { useKonamiCode } from './hooks/useKonamiCode';
 
 // Components
 import AuthPage from './components/Auth/AuthPage';
@@ -50,6 +51,13 @@ const ProtectedRoute = ({ children }) => {
 const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const { setTheme } = useTheme();
+
+  useKonamiCode(() => {
+    setTheme('pokemon');
+    // Optional: Add a visual cue here if desired, e.g., confetti
+    alert('🌟 You found a secret! Welcome to the Pokemon theme! 🌟');
+  });
 
   useEffect(() => {
     const handleResize = () => {

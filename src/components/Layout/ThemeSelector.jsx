@@ -12,6 +12,7 @@ const MASCOTS = {
     mountain: { emoji: '🦅', name: 'Summit', greeting: 'Reach new heights!' },
     ocean: { emoji: '🐬', name: 'Splash', greeting: 'Dive deep!' },
     space: { emoji: '👽', name: 'Cosmo', greeting: 'To infinity!' },
+    pokemon: { emoji: '⚡', name: 'Sparky', greeting: 'Pika Pika!' },
 };
 
 const ThemeSelector = () => {

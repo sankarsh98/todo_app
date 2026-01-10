@@ -1,6 +1,7 @@
 // Quick Add Task Component
 import { useState, useRef, useEffect } from 'react';
 import { useTasks } from '../../context/TaskContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useNaturalLanguage } from '../../hooks/useNaturalLanguage';
 import './QuickAdd.css';
 
@@ -9,6 +10,7 @@ const QuickAdd = ({ isOpen, onClose, defaultInMyDay = false, defaultLabels = [],
     const [parsedPreview, setParsedPreview] = useState(null);
     const inputRef = useRef(null);
     const { createTask, createLabel, labels } = useTasks();
+    const { setTheme } = useTheme();
     const { parseInput } = useNaturalLanguage();
 
     useEffect(() => {
@@ -43,6 +45,15 @@ const QuickAdd = ({ isOpen, onClose, defaultInMyDay = false, defaultLabels = [],
         e.preventDefault();
 
         if (!input.trim()) return;
+
+        // Easter Egg: Catch 'em all
+        if (input.trim().toLowerCase() === "catch 'em all") {
+            setTheme('pokemon');
+            setInput('');
+            setParsedPreview(null);
+            alert('🔴 Gotta catch \'em all! Pokemon theme unlocked!');
+            return;
+        }
 
         const parsed = parseInput(input, labels);
 
