@@ -126,6 +126,8 @@ const Confetti = ({ trigger, intensity = 'medium', originX, originY }) => {
 
         if (particlesRef.current.length > 0) {
             animationRef.current = requestAnimationFrame(animate);
+        } else {
+            animationRef.current = null;
         }
     }, []);
 

@@ -1,30 +1,91 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
+
+// Singleton AudioContext to avoid creating too many contexts
+let audioContext = null;
 
 export const useSound = () => {
     const { soundEnabled } = useTheme();
+    const contextRef = useRef(null);
+
+    // Initialize/Unlock AudioContext on user interaction
+    useEffect(() => {
+        const initAudio = () => {
+            if (!audioContext) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioContext = new AudioContext();
+                }
+            }
+
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            contextRef.current = audioContext;
+        };
+
+        const handleInteraction = () => {
+            initAudio();
+            // Remove listeners once initialized
+            if (audioContext && audioContext.state === 'running') {
+                window.removeEventListener('click', handleInteraction);
+                window.removeEventListener('keydown', handleInteraction);
+                window.removeEventListener('touchstart', handleInteraction);
+            }
+        };
+
+        window.addEventListener('click', handleInteraction);
+        window.addEventListener('keydown', handleInteraction);
+        window.addEventListener('touchstart', handleInteraction);
+
+        return () => {
+            window.removeEventListener('click', handleInteraction);
+            window.removeEventListener('keydown', handleInteraction);
+            window.removeEventListener('touchstart', handleInteraction);
+        };
+    }, []);
 
     const playTone = useCallback((frequency, type, duration, volume = 0.1) => {
         if (!soundEnabled) return;
 
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
+        // Ensure context exists
+        if (!audioContext) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                audioContext = new AudioContext();
+            } else {
+                return;
+            }
+        }
 
-        const ctx = new AudioContext();
+        const ctx = audioContext;
+
+        // If suspended, try to resume (though usually needs user gesture)
+        if (ctx.state === 'suspended') {
+            ctx.resume().catch(e => console.warn('AudioContext resume failed:', e));
+        }
+
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
 
         osc.type = type;
         osc.frequency.setValueAtTime(frequency, ctx.currentTime);
 
-        gain.gain.setValueAtTime(volume, ctx.currentTime);
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
 
         osc.connect(gain);
         gain.connect(ctx.destination);
 
         osc.start();
-        osc.stop(ctx.currentTime + duration);
+        osc.stop(ctx.currentTime + duration + 0.1); // Small buffer for decay
+
+        // Clean up
+        setTimeout(() => {
+            osc.disconnect();
+            gain.disconnect();
+        }, (duration + 0.1) * 1000);
     }, [soundEnabled]);
 
     const playSuccess = useCallback(() => {
@@ -50,9 +111,11 @@ export const useSound = () => {
 
     const playThemeSwitch = useCallback(() => {
         if (!soundEnabled) return;
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
+
+        // Safety check for context
+        if (!audioContext) return;
+        const ctx = audioContext;
+
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
 
