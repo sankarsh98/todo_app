@@ -12,6 +12,14 @@ import AuthPage from './components/Auth/AuthPage';
 import Sidebar from './components/Layout/Sidebar';
 import MobileNav from './components/Layout/MobileNav';
 import GamificationNotifications from './components/Gamification/GamificationNotifications';
+import CelebrationOverlay from './components/Gamification/CelebrationOverlay';
+import Confetti from './components/Effects/Confetti';
+import AmbientBackground from './components/Effects/AmbientBackground';
+
+// Hooks
+import { useSecretCodes } from './hooks/useSecretCodes';
+import { useConfetti } from './hooks/useConfetti';
+import { useSound } from './hooks/useSound';
 
 // Views
 import MyDay from './views/MyDay';
@@ -33,36 +41,36 @@ const LoadingScreen = () => (
 );
 
 const NotificationChecker = () => {
-    const { tasks } = useTasks();
+  const { tasks } = useTasks();
 
-    useEffect(() => {
-        const checkReminders = () => {
-            if (!("Notification" in window) || Notification.permission !== "granted") return;
+  useEffect(() => {
+    const checkReminders = () => {
+      if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-            const now = new Date();
-            tasks.forEach(task => {
-                if (!task.dueDate || task.completed) return;
-                const due = new Date(task.dueDate);
-                const diff = due.getTime() - now.getTime();
-                
-                // Notify if due within the next minute (0 to 60000ms)
-                if (diff > 0 && diff <= 60000) {
-                     new Notification(`Task Due: ${task.title}`, {
-                        body: task.description || "It's time!",
-                        icon: "/favicon.svg",
-                        tag: `task-${task.id}`
-                     });
-                }
-            });
-        };
+      const now = new Date();
+      tasks.forEach(task => {
+        if (!task.dueDate || task.completed) return;
+        const due = new Date(task.dueDate);
+        const diff = due.getTime() - now.getTime();
 
-        const interval = setInterval(checkReminders, 10000); // Check every 10 seconds for better precision
-        // checkReminders(); // Don't run immediately to avoid spam on load if just opened
+        // Notify if due within the next minute (0 to 60000ms)
+        if (diff > 0 && diff <= 60000) {
+          new Notification(`Task Due: ${task.title}`, {
+            body: task.description || "It's time!",
+            icon: "/favicon.svg",
+            tag: `task-${task.id}`
+          });
+        }
+      });
+    };
 
-        return () => clearInterval(interval);
-    }, [tasks]);
+    const interval = setInterval(checkReminders, 10000); // Check every 10 seconds for better precision
+    // checkReminders(); // Don't run immediately to avoid spam on load if just opened
 
-    return null;
+    return () => clearInterval(interval);
+  }, [tasks]);
+
+  return null;
 };
 
 // Protected Route Component
@@ -85,11 +93,31 @@ const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const { setTheme } = useTheme();
+  const { isDiscoMode, isRalphMode, isPikachuMode, activeMode } = useSecretCodes();
+  const { trigger: confettiTrigger, intensity: confettiIntensity, origin: confettiOrigin, fireEpic } = useConfetti();
+  const { playEpicWin, playDiscoBeep, playPikachuCry, playRalphGiggle } = useSound();
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationType, setCelebrationType] = useState('levelUp');
+  const [celebrationData, setCelebrationData] = useState({});
+
+  // Handle secret mode activations
+  useEffect(() => {
+    if (isDiscoMode) {
+      playDiscoBeep();
+    } else if (isPikachuMode) {
+      playPikachuCry();
+    } else if (isRalphMode) {
+      playRalphGiggle();
+    }
+  }, [isDiscoMode, isPikachuMode, isRalphMode, playDiscoBeep, playPikachuCry, playRalphGiggle]);
 
   useKonamiCode(() => {
     setTheme('pokemon');
-    // Optional: Add a visual cue here if desired, e.g., confetti
-    alert('🌟 You found a secret! Welcome to the Pokemon theme! 🌟');
+    fireEpic();
+    playEpicWin();
+    setCelebrationType('epic');
+    setCelebrationData({ name: 'Secret Unlocked!', description: 'You found the Konami Code!' });
+    setShowCelebration(true);
   });
 
   useEffect(() => {
@@ -164,6 +192,35 @@ const AppLayout = () => {
 
           {isMobile && <MobileNav onMenuClick={toggleSidebar} />}
           <GamificationNotifications />
+
+          {/* Beethoven Mode Global Effects */}
+          <AmbientBackground isDiscoMode={isDiscoMode} />
+          <Confetti
+            trigger={confettiTrigger}
+            intensity={confettiIntensity}
+            originX={confettiOrigin.x}
+            originY={confettiOrigin.y}
+          />
+          <CelebrationOverlay
+            isVisible={showCelebration}
+            onClose={() => setShowCelebration(false)}
+            type={celebrationType}
+            data={celebrationData}
+            isRalphMode={isRalphMode}
+          />
+
+          {/* Secret Mode Indicator */}
+          {activeMode && (
+            <div className="secret-mode-indicator">
+              {activeMode === 'beethoven' && '🎹 Piano Mode'}
+              {activeMode === 'disco' && '🪩 Disco Mode'}
+              {activeMode === 'party' && '🎉 Party Mode'}
+              {activeMode === 'ralphwiggum' && '🍕 Ralph Mode'}
+              {activeMode === 'pikachu' && '⚡ Pikachu Mode'}
+              {activeMode === 'waka' && '👻 Pacman Mode'}
+              {activeMode === 'apollo' && '🚀 Apollo Mode'}
+            </div>
+          )}
         </div>
       </GamificationProvider>
     </TaskProvider>
