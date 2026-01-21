@@ -22,10 +22,8 @@ const ThemeSelector = () => {
     const { theme, setTheme, getCurrentTheme, soundEnabled, toggleSound } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
     const [showMascot, setShowMascot] = useState(false);
-    const [notificationsEnabled, setNotificationsEnabled] = useState(
-        "Notification" in window && Notification.permission === "granted"
-    );
-    
+
+
     // Sound effects
     const { playClick, playThemeSwitch, playSuccess } = useSound();
 
@@ -48,19 +46,7 @@ const ThemeSelector = () => {
         setIsOpen(!isOpen);
     };
 
-    const requestNotifications = async () => {
-        if (!("Notification" in window)) {
-            alert("This browser does not support desktop notifications");
-            return;
-        }
-        
-        const permission = await Notification.requestPermission();
-        if (permission === "granted") {
-            setNotificationsEnabled(true);
-            new Notification("Notifications enabled!", { body: "You will now receive reminders for your tasks." });
-            playSuccess();
-        }
-    };
+
 
     return (
         <div className={`theme-selector theme-${theme}`}>
@@ -131,27 +117,18 @@ const ThemeSelector = () => {
                             );
                         })}
                     </div>
-                    
+
                     <div className="theme-preferences">
                         <div className="preference-item">
                             <span>🔊 Sounds</span>
-                            <button 
+                            <button
                                 className={`preference-toggle ${soundEnabled ? 'active' : ''}`}
                                 onClick={toggleSound}
                             >
                                 <div className="toggle-handle" />
                             </button>
                         </div>
-                        <div className="preference-item">
-                            <span>🔔 Reminders</span>
-                            {notificationsEnabled ? (
-                                <span className="preference-status">On</span>
-                            ) : (
-                                <button className="btn-xs btn-primary" onClick={requestNotifications}>
-                                    Enable
-                                </button>
-                            )}
-                        </div>
+
                     </div>
 
                     <div className="theme-dropdown-footer">
