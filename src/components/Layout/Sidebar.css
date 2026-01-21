@@ -398,6 +398,35 @@
     color: var(--color-danger);
 }
 
+/* BMC Button */
+.sidebar-bmc-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    background: #FFDD00;
+    color: #000000;
+    font-weight: var(--font-weight-bold);
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.sidebar-bmc-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.sidebar-closed .sidebar-bmc-btn .sidebar-nav-label {
+    display: none;
+}
+
+.sidebar-closed .sidebar-bmc-btn {
+    justify-content: center;
+    padding: var(--space-3);
+}
+
 /* Mobile Styles */
 @media (max-width: 768px) {
     .sidebar {
