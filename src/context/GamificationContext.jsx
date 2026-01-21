@@ -69,7 +69,7 @@ export const GamificationProvider = ({ children }) => {
     const { user } = useAuth();
     const [gamificationEnabled, setGamificationEnabled] = useState(() => {
         const saved = localStorage.getItem('gamificationEnabled');
-        return saved ? JSON.parse(saved) : false;
+        return saved ? JSON.parse(saved) : true;
     });
 
     const [stats, setStats] = useState(DEFAULT_STATS);

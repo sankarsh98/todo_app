@@ -10,7 +10,6 @@ const TaskModal = ({ task, isOpen, onClose }) => {
     const [newSubtask, setNewSubtask] = useState('');
     const [showLabelPicker, setShowLabelPicker] = useState(false);
     const [newLabelName, setNewLabelName] = useState('');
-    const [enableReminder, setEnableReminder] = useState(false);
     const titleRef = useRef(null);
 
     useEffect(() => {
@@ -18,10 +17,7 @@ const TaskModal = ({ task, isOpen, onClose }) => {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setEditedTask({ ...task });
             if (task.dueDate) {
-                const d = new Date(task.dueDate);
-                setEnableReminder(d.getHours() !== 0 || d.getMinutes() !== 0);
-            } else {
-                setEnableReminder(false);
+                // Keep existing date logic if needed, but remove reminder specific toggle logic
             }
         }
     }, [task, isOpen]);
@@ -188,53 +184,15 @@ const TaskModal = ({ task, isOpen, onClose }) => {
                                         newDate.setFullYear(y);
                                         newDate.setMonth(m - 1);
                                         newDate.setDate(d);
-                                        
+
                                         if (!editedTask.dueDate) {
-                                            // Set default time based on reminder setting
-                                            newDate.setHours(enableReminder ? 9 : 0, 0, 0, 0);
+                                            newDate.setHours(0, 0, 0, 0);
                                         }
                                         setEditedTask({ ...editedTask, dueDate: newDate });
                                     }}
                                     className="task-property-input date-input"
                                 />
-                                
-                                <div className="reminder-row">
-                                    <label className="reminder-toggle">
-                                        <input
-                                            type="checkbox"
-                                            checked={enableReminder}
-                                            onChange={e => {
-                                                const isEnabled = e.target.checked;
-                                                setEnableReminder(isEnabled);
-                                                if (editedTask.dueDate) {
-                                                    const newDate = new Date(editedTask.dueDate);
-                                                    if (isEnabled) {
-                                                        newDate.setHours(9, 0); // Default to 9 AM
-                                                    } else {
-                                                        newDate.setHours(0, 0); // Reset to midnight
-                                                    }
-                                                    setEditedTask({ ...editedTask, dueDate: newDate });
-                                                }
-                                            }}
-                                        />
-                                        <span>Set time</span>
-                                    </label>
-                                    
-                                    {enableReminder && (
-                                        <input
-                                            type="time"
-                                            value={editedTask.dueDate ? format(new Date(editedTask.dueDate), "HH:mm") : '09:00'}
-                                            onChange={e => {
-                                                if (!editedTask.dueDate) return;
-                                                const [h, m] = e.target.value.split(':').map(Number);
-                                                const newDate = new Date(editedTask.dueDate);
-                                                newDate.setHours(h, m);
-                                                setEditedTask({ ...editedTask, dueDate: newDate });
-                                            }}
-                                            className="task-property-input time-input"
-                                        />
-                                    )}
-                                </div>
+
                             </div>
                         </div>
 
